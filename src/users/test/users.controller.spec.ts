@@ -13,7 +13,14 @@ describe('UsersController', () => {
         {
           provide: UsersService,
           useValue: {
-            newUser: jest.fn((x) => x),
+            verifyNewUsername: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
+            newUser: jest
+              .fn()
+              .mockImplementation(() =>
+                Promise.resolve({ username: 'johndoe', fullname: 'John Doe' }),
+              ),
           },
         },
       ],
@@ -29,15 +36,6 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     it('should be able to create new user', async () => {
-      service.verifyNewUsername = jest
-        .fn()
-        .mockImplementation(() => Promise.resolve());
-      service.newUser = jest
-        .fn()
-        .mockImplementation(() =>
-          Promise.resolve({ username: 'johndoe', fullname: 'John Doe' }),
-        );
-
       const createUser = await controller.createUser({
         username: 'johndoe',
         password: 'secret',
