@@ -1,6 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { GetCurrentUsername } from '../common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +22,17 @@ export class AuthController {
         accessToken,
         refreshToken,
       },
+    };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete()
+  async logout(@GetCurrentUsername() username: string) {
+    await this.authService.deleteToken(username);
+
+    return {
+      status: 'success',
+      message: 'refresh token deleted successfully',
     };
   }
 }

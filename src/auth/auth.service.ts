@@ -66,4 +66,15 @@ export class AuthService {
       },
     });
   }
+
+  async deleteToken(username: string) {
+    await this.prisma.user.update({
+      where: {
+        username,
+      },
+      data: {
+        token: null,
+      },
+    });
+  }
 }

@@ -41,20 +41,35 @@ describe('AuthController', () => {
         .fn()
         .mockImplementation(() => Promise.resolve());
 
-      const login = await controller.login({
+      const result = await controller.login({
         username: 'johndoe',
         password: 'secret',
       });
 
-      expect(login).toBeDefined();
-      expect(login.status).toBeDefined();
-      expect(login.status).toBe('success');
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
 
-      expect(login.data).toBeDefined();
-      expect(login.data.accessToken).toBeDefined();
-      expect(login.data.accessToken).toBe('access_token');
-      expect(login.data.refreshToken).toBeDefined();
-      expect(login.data.refreshToken).toBe('refresh_token');
+      expect(result.data).toBeDefined();
+      expect(result.data.accessToken).toBeDefined();
+      expect(result.data.accessToken).toBe('access_token');
+      expect(result.data.refreshToken).toBeDefined();
+      expect(result.data.refreshToken).toBe('refresh_token');
+    });
+  });
+
+  describe('logout', () => {
+    it('should be able to logout', async () => {
+      service.deleteToken = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve());
+
+      const result = await controller.logout('johndoe');
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.message).toBeDefined();
     });
   });
 });

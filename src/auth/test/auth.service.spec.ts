@@ -102,4 +102,14 @@ describe('AuthService', () => {
       ).toBeUndefined();
     });
   });
+
+  describe('deleteToken', () => {
+    it('should be able to delete refresh token', async () => {
+      prisma.user.update = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve());
+
+      expect(await service.deleteToken('johndoe')).toBeUndefined();
+    });
+  });
 });
