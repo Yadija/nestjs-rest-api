@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,6 +17,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post()
+  @HttpCode(HttpStatus.OK)
   async login(@Body() auth: AuthDto) {
     const username = await this.authService.verifyUserCredential(auth);
     const { accessToken, refreshToken } = await this.authService.getTokens(
@@ -27,6 +36,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Delete()
+  @HttpCode(HttpStatus.OK)
   async logout(@GetCurrentUsername() username: string) {
     await this.authService.deleteToken(username);
 
