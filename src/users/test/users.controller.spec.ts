@@ -36,19 +36,19 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     it('should be able to create new user', async () => {
-      const createUser = await controller.createUser({
+      const result = await controller.createUser({
         username: 'johndoe',
         password: 'secret',
         fullname: 'John Doe',
       });
 
-      expect(createUser).toBeDefined();
-      expect(createUser.status).toBeDefined();
-      expect(createUser.status).toBe('success');
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
 
-      expect(createUser.data).toBeDefined();
-      expect(createUser.data.username).toBeDefined();
-      expect(createUser.data.fullname).toBeDefined();
+      expect(result.data).toBeDefined();
+      expect(result.data.username).toBeDefined();
+      expect(result.data.fullname).toBeDefined();
     });
   });
 });
