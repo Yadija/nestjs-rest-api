@@ -5,12 +5,13 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetCurrentUsername } from '../common/decorators';
+import { GetCurrentUser, GetCurrentUsername } from '../common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -43,6 +44,23 @@ export class AuthController {
     return {
       status: 'success',
       message: 'refresh token deleted successfully',
+    };
+  }
+
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @Put()
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @GetCurrentUsername() username: string,
+    @GetCurrentUser('refreshToken') refreshToken: string,
+  ) {
+    await this.authService.verifyUserAndToken(username, refreshToken);
+    const tokens = await this.authService.getTokens(username);
+    await this.authService.updateRefreshToken(username, tokens.refreshToken);
+
+    return {
+      status: 'success',
+      data: tokens,
     };
   }
 }

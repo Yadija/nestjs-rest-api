@@ -1,5 +1,9 @@
 import * as bcrypt from 'bcrypt';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -76,5 +80,24 @@ export class AuthService {
         token: null,
       },
     });
+  }
+
+  async verifyUserAndToken(username: string, refreshToken: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        token: true,
+      },
+    });
+
+    if (!user.token) {
+      throw new ForbiddenException('access denied');
+    }
+
+    if (user.token !== refreshToken) {
+      throw new ForbiddenException('access denied');
+    }
   }
 }

@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -110,6 +110,28 @@ describe('AuthService', () => {
         .mockImplementation(() => Promise.resolve());
 
       expect(await service.deleteToken('johndoe')).toBeUndefined();
+    });
+  });
+
+  describe('verifyUserAndToken', () => {
+    it('should throw forbidden error if user token null', async () => {
+      prisma.user.findUnique = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve({ token: null }));
+
+      expect(async () => {
+        await service.verifyUserAndToken('johndoe', 'refresh_token');
+      }).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw forbidden error if token invalid', async () => {
+      prisma.user.findUnique = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve({ token: 'refresh_token' }));
+
+      expect(async () => {
+        await service.verifyUserAndToken('johndoe', 'wrong_refresh_token');
+      }).rejects.toThrow(ForbiddenException);
     });
   });
 });

@@ -22,6 +22,12 @@ describe('AuthController', () => {
                 refreshToken: 'refresh_token',
               }),
             ),
+            updateRefreshToken: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
+            verifyUserAndToken: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
           },
         },
       ],
@@ -37,10 +43,6 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should be able to login', async () => {
-      service.updateRefreshToken = jest
-        .fn()
-        .mockImplementation(() => Promise.resolve());
-
       const result = await controller.login({
         username: 'johndoe',
         password: 'secret',
@@ -70,6 +72,22 @@ describe('AuthController', () => {
       expect(result.status).toBeDefined();
       expect(result.status).toBe('success');
       expect(result.message).toBeDefined();
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('should be able to refreshToken', async () => {
+      const result = await controller.refreshToken('johndoe', 'refresh_token');
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+
+      expect(result.data).toBeDefined();
+      expect(result.data.accessToken).toBeDefined();
+      expect(result.data.accessToken).toBe('access_token');
+      expect(result.data.refreshToken).toBeDefined();
+      expect(result.data.refreshToken).toBe('refresh_token');
     });
   });
 });
