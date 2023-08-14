@@ -15,6 +15,18 @@ model User {
   password String  @db.Text
   fullname String  @db.VarChar(100)
   token    String? @db.Text
+  threads  Thread[]
 
   @@map("users")
+}
+
+model Thread {
+  id         String @id @default(uuid())
+  content    String @db.VarChar(50)
+  owner      String @db.VarChar(50)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User   @relation(fields: [owner], references: [username])
+
+  @@map("threads")
 }
