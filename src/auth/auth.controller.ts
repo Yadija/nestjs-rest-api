@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { GetCurrentUser, GetCurrentUsername } from '../common/decorators';
+import { AccessTokenGuard, RefreshTokenGuard } from '../common/guards';
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +35,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AccessTokenGuard)
   @Delete()
   @HttpCode(HttpStatus.OK)
   async logout(@GetCurrentUsername() username: string) {
@@ -47,7 +47,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(RefreshTokenGuard)
   @Put()
   @HttpCode(HttpStatus.OK)
   async refreshToken(
