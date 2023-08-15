@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -79,6 +80,23 @@ export class ThreadsController {
     return {
       status: 'success',
       message: 'thread updated successfully',
+    };
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Delete(':threadId')
+  @HttpCode(HttpStatus.OK)
+  async deleteThread(
+    @GetCurrentUsername() username: string,
+    @Param('threadId') id: string,
+  ) {
+    const { owner } = await this.threadsService.checkThreadIsExist(id);
+    await this.threadsService.verifyThreadOwner(owner, username);
+    await this.threadsService.deleteThreadById(id);
+
+    return {
+      status: 'success',
+      message: 'thread deleted successfully',
     };
   }
 }

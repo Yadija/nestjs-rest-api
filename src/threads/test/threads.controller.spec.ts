@@ -42,6 +42,9 @@ describe('ThreadsController', () => {
             editThreadById: jest
               .fn()
               .mockImplementation(() => Promise.resolve()),
+            deleteThreadById: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
             checkThreadIsExist: jest.fn().mockImplementation(() =>
               Promise.resolve({
                 owner: 'johndoe',
@@ -125,6 +128,17 @@ describe('ThreadsController', () => {
         { content: 'Update Thread' },
         'thread-1',
       );
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.message).toBeDefined();
+    });
+  });
+
+  describe('deleteThread', () => {
+    it('should be able to delete thread', async () => {
+      const result = await controller.deleteThread('johndoe', 'thread-1');
 
       expect(result).toBeDefined();
       expect(result.status).toBeDefined();

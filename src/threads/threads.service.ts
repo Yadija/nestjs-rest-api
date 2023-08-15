@@ -62,6 +62,14 @@ export class ThreadsService {
     });
   }
 
+  async deleteThreadById(id: string) {
+    await this.prisma.thread.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
   async checkThreadIsExist(id: string) {
     const thread = await this.prisma.thread.findFirst({
       where: {

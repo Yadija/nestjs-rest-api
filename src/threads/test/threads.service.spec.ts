@@ -42,6 +42,7 @@ describe('ThreadsService', () => {
                 }),
               ),
               update: jest.fn().mockImplementation(() => Promise.resolve()),
+              delete: jest.fn().mockImplementation(() => Promise.resolve()),
             },
           },
         },
@@ -108,6 +109,12 @@ describe('ThreadsService', () => {
       expect(
         await service.editThreadById('thread-1', 'Update Thread'),
       ).toBeUndefined();
+    });
+  });
+
+  describe('deleteThreadById', () => {
+    it('should be able to delete thread', async () => {
+      expect(await service.deleteThreadById('thread-1')).toBeUndefined();
     });
   });
 
