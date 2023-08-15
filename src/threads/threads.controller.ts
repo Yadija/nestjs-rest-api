@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -45,6 +46,19 @@ export class ThreadsController {
       status: 'success',
       data: {
         threads,
+      },
+    };
+  }
+
+  @Get(':threadId')
+  @HttpCode(HttpStatus.OK)
+  async getThreadById(@Param('threadId') id: string) {
+    const thread = await this.threadsService.getThreadById(id);
+
+    return {
+      status: 'success',
+      data: {
+        thread,
       },
     };
   }

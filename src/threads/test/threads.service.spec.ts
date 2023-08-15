@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThreadsService } from '../threads.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('ThreadsService', () => {
   let service: ThreadsService;
@@ -30,6 +31,15 @@ describe('ThreadsService', () => {
                     owner: 'janedoe',
                   },
                 ]),
+              ),
+              findFirst: jest.fn().mockImplementation(() =>
+                Promise.resolve({
+                  id: 'thread-1',
+                  content: 'New Thread',
+                  owner: 'johndoe',
+                  created_at: '1970-01-01 00:00:00.000',
+                  updated_at: '1970-01-01 00:00:00.000',
+                }),
               ),
             },
           },
@@ -67,6 +77,28 @@ describe('ThreadsService', () => {
           owner: 'janedoe',
         },
       ]);
+    });
+  });
+
+  describe('getThreadById', () => {
+    it('should throw not found error if id wrong', async () => {
+      prisma.thread.findFirst = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(null));
+
+      expect(() => service.getThreadById('thread-1')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should be able to return thread by id', async () => {
+      expect(await service.getThreadById('thread-1')).toStrictEqual({
+        id: 'thread-1',
+        content: 'New Thread',
+        owner: 'johndoe',
+        createdAt: '1970-01-01 00:00:00.000',
+        updatedAt: '1970-01-01 00:00:00.000',
+      });
     });
   });
 });

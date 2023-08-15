@@ -30,6 +30,15 @@ describe('ThreadsController', () => {
                 },
               ]),
             ),
+            getThreadById: jest.fn().mockImplementation(() =>
+              Promise.resolve({
+                id: 'thread-1',
+                content: 'New Thread',
+                owner: 'johndoe',
+                createdAt: '1970-01-01 00:00:00.000',
+                updatedAt: '1970-01-01 00:00:00.000',
+              }),
+            ),
           },
         },
       ],
@@ -76,6 +85,26 @@ describe('ThreadsController', () => {
         expect(result.data.threads[i].content).toBeDefined();
         expect(result.data.threads[i].owner).toBeDefined();
       }
+    });
+  });
+
+  describe('getThreadById', () => {
+    it('should be able to get thread by id', async () => {
+      const result = await controller.getThreadById('thread-1');
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+      console.log(result);
+
+      expect(result.data).toBeDefined();
+      expect(result.data.thread).toBeDefined();
+
+      expect(result.data.thread.id).toBeDefined();
+      expect(result.data.thread.content).toBeDefined();
+      expect(result.data.thread.owner).toBeDefined();
+      expect(result.data.thread.createdAt).toBeDefined();
+      expect(result.data.thread.updatedAt).toBeDefined();
     });
   });
 });
