@@ -39,6 +39,17 @@ describe('ThreadsController', () => {
                 updatedAt: '1970-01-01 00:00:00.000',
               }),
             ),
+            editThreadById: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
+            checkThreadIsExist: jest.fn().mockImplementation(() =>
+              Promise.resolve({
+                owner: 'johndoe',
+              }),
+            ),
+            verifyThreadOwner: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve()),
           },
         },
       ],
@@ -95,7 +106,6 @@ describe('ThreadsController', () => {
       expect(result).toBeDefined();
       expect(result.status).toBeDefined();
       expect(result.status).toBe('success');
-      console.log(result);
 
       expect(result.data).toBeDefined();
       expect(result.data.thread).toBeDefined();
@@ -105,6 +115,21 @@ describe('ThreadsController', () => {
       expect(result.data.thread.owner).toBeDefined();
       expect(result.data.thread.createdAt).toBeDefined();
       expect(result.data.thread.updatedAt).toBeDefined();
+    });
+  });
+
+  describe('updateThread', () => {
+    it('should be able to update thread', async () => {
+      const result = await controller.updateThread(
+        'johndoe',
+        { content: 'Update Thread' },
+        'thread-1',
+      );
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+      expect(result.message).toBeDefined();
     });
   });
 });

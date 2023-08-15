@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -45,5 +49,41 @@ export class ThreadsService {
       createdAt: result.created_at,
       updatedAt: result.updated_at,
     };
+  }
+
+  async editThreadById(id: string, content: string) {
+    await this.prisma.thread.update({
+      where: {
+        id,
+      },
+      data: {
+        content,
+      },
+    });
+  }
+
+  async checkThreadIsExist(id: string) {
+    const thread = await this.prisma.thread.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        owner: true,
+      },
+    });
+
+    if (!thread) {
+      throw new NotFoundException('cannot find thread');
+    }
+
+    return thread;
+  }
+
+  async verifyThreadOwner(owner: string, username: string) {
+    if (owner !== username) {
+      throw new ForbiddenException(
+        'you are not entitled to access this resource',
+      );
+    }
   }
 }

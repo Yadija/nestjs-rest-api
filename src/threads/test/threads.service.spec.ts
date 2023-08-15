@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThreadsService } from '../threads.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('ThreadsService', () => {
   let service: ThreadsService;
@@ -41,6 +41,7 @@ describe('ThreadsService', () => {
                   updated_at: '1970-01-01 00:00:00.000',
                 }),
               ),
+              update: jest.fn().mockImplementation(() => Promise.resolve()),
             },
           },
         },
@@ -99,6 +100,44 @@ describe('ThreadsService', () => {
         createdAt: '1970-01-01 00:00:00.000',
         updatedAt: '1970-01-01 00:00:00.000',
       });
+    });
+  });
+
+  describe('editThreadById', () => {
+    it('should be able to update thread', async () => {
+      expect(
+        await service.editThreadById('thread-1', 'Update Thread'),
+      ).toBeUndefined();
+    });
+  });
+
+  describe('checkThreadIsExist', () => {
+    it('should throw not found error if id wrong', async () => {
+      prisma.thread.findFirst = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(null));
+
+      expect(() => service.checkThreadIsExist('thread-1')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should be able to return thread by id', async () => {
+      prisma.thread.findFirst = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve({ content: 'New Thread' }));
+
+      expect(await service.checkThreadIsExist('thread-1')).toStrictEqual({
+        content: 'New Thread',
+      });
+    });
+  });
+
+  describe('verifyThreadOwner', () => {
+    it('should throw forbidden error if not actually owner', async () => {
+      expect(() =>
+        service.verifyThreadOwner('owner-1', 'owner-2'),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

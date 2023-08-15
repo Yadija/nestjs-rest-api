@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ThreadsService } from './threads.service';
@@ -60,6 +61,24 @@ export class ThreadsController {
       data: {
         thread,
       },
+    };
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Put(':threadId')
+  @HttpCode(HttpStatus.OK)
+  async updateThread(
+    @GetCurrentUsername() username: string,
+    @Body() thread: ThreadDto,
+    @Param('threadId') id: string,
+  ) {
+    const { owner } = await this.threadsService.checkThreadIsExist(id);
+    await this.threadsService.verifyThreadOwner(owner, username);
+    await this.threadsService.editThreadById(id, thread.content);
+
+    return {
+      status: 'success',
+      message: 'thread updated successfully',
     };
   }
 }
