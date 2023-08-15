@@ -16,6 +16,20 @@ describe('ThreadsController', () => {
             addthread: jest
               .fn()
               .mockImplementation(() => Promise.resolve({ id: 'thread-1' })),
+            getAllThreads: jest.fn().mockImplementation(() =>
+              Promise.resolve([
+                {
+                  id: 'thread-1',
+                  content: 'Thread 1',
+                  owner: 'johndoe',
+                },
+                {
+                  id: 'thread-2',
+                  content: 'Thread 2',
+                  owner: 'janedoe',
+                },
+              ]),
+            ),
           },
         },
       ],
@@ -42,6 +56,26 @@ describe('ThreadsController', () => {
       expect(result.data).toBeDefined();
       expect(result.data.threadId).toBeDefined();
       expect(result.data.threadId).toBe('thread-1');
+    });
+  });
+
+  describe('getThreads', () => {
+    it('should be able to get all threads', async () => {
+      const result = await controller.getThreads();
+
+      expect(result).toBeDefined();
+      expect(result.status).toBeDefined();
+      expect(result.status).toBe('success');
+
+      expect(result.data).toBeDefined();
+      expect(result.data.threads).toBeDefined();
+      expect(result.data.threads).toHaveLength(2);
+
+      for (let i = 0; i < result.data.threads.length; i++) {
+        expect(result.data.threads[i].id).toBeDefined();
+        expect(result.data.threads[i].content).toBeDefined();
+        expect(result.data.threads[i].owner).toBeDefined();
+      }
     });
   });
 });

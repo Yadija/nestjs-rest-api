@@ -17,6 +17,20 @@ describe('ThreadsService', () => {
               create: jest
                 .fn()
                 .mockImplementation(() => Promise.resolve({ id: 'thread-1' })),
+              findMany: jest.fn().mockImplementation(() =>
+                Promise.resolve([
+                  {
+                    id: 'thread-1',
+                    content: 'Thread 1',
+                    owner: 'johndoe',
+                  },
+                  {
+                    id: 'thread-2',
+                    content: 'Thread 2',
+                    owner: 'janedoe',
+                  },
+                ]),
+              ),
             },
           },
         },
@@ -36,6 +50,23 @@ describe('ThreadsService', () => {
       expect(await service.addthread('New Thread', 'johndoe')).toStrictEqual({
         id: 'thread-1',
       });
+    });
+  });
+
+  describe('getAllThreads', () => {
+    it('should be able to return all threads', async () => {
+      expect(await service.getAllThreads()).toStrictEqual([
+        {
+          id: 'thread-1',
+          content: 'Thread 1',
+          owner: 'johndoe',
+        },
+        {
+          id: 'thread-2',
+          content: 'Thread 2',
+          owner: 'janedoe',
+        },
+      ]);
     });
   });
 });

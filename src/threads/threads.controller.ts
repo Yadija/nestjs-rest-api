@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -31,6 +32,19 @@ export class ThreadsController {
       status: 'success',
       data: {
         threadId: id,
+      },
+    };
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async getThreads() {
+    const threads = await this.threadsService.getAllThreads();
+
+    return {
+      status: 'success',
+      data: {
+        threads,
       },
     };
   }

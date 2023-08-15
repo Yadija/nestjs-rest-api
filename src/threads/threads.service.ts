@@ -16,4 +16,14 @@ export class ThreadsService {
       },
     });
   }
+
+  async getAllThreads() {
+    return this.prisma.thread.findMany({
+      select: {
+        id: true,
+        content: true,
+        owner: true,
+      },
+    });
+  }
 }
