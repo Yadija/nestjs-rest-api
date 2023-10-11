@@ -84,4 +84,47 @@ describe('Auth (e2e)', () => {
       expect(body.error).toBe('Unauthorized');
     });
   });
+
+  describe('PUT: /auth', () => {
+    it('it should cannot update access token if refresh token is incorrect', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+
+      const { status, body } = await request(app.getHttpServer())
+        .put('/auth')
+        .auth('wrong_refresh_token', {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(401);
+      expect(body.message).toBeDefined();
+      expect(body.message).toBe('Unauthorized');
+    });
+
+    it('it should can update access token and refresh token', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const response = await request(app.getHttpServer()).post('/auth').send({
+        username: 'johndoe',
+        password: 'secret',
+      });
+
+      const { status, body } = await request(app.getHttpServer())
+        .put('/auth')
+        .auth(response.body.data.refreshToken, {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(200);
+      expect(body.status).toBe('success');
+      expect(body.data.accessToken).toBeDefined();
+      expect(body.data.refreshToken).toBeDefined();
+    });
+  });
 });
