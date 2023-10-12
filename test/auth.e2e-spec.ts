@@ -127,4 +127,46 @@ describe('Auth (e2e)', () => {
       expect(body.data.refreshToken).toBeDefined();
     });
   });
+
+  describe('DELETE: /auth', () => {
+    it('it should cannot delete refresh token if access token is incorrect', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+
+      const { status, body } = await request(app.getHttpServer())
+        .delete('/auth')
+        .auth('wrong_access_token', {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(401);
+      expect(body.message).toBeDefined();
+      expect(body.message).toBe('Unauthorized');
+    });
+
+    it('it should can delete refresh token', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const response = await request(app.getHttpServer()).post('/auth').send({
+        username: 'johndoe',
+        password: 'secret',
+      });
+
+      const { status, body } = await request(app.getHttpServer())
+        .delete('/auth')
+        .auth(response.body.data.accessToken, {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(200);
+      expect(body.status).toBe('success');
+      expect(body.message).toBeDefined();
+    });
+  });
 });
