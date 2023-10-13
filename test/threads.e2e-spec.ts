@@ -66,4 +66,86 @@ describe('Threads (e2e)', () => {
       expect(body.message).toBe('Unauthorized');
     });
   });
+
+  describe('GET: /threads', () => {
+    it('it should can find all threads', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const response = await request(app.getHttpServer()).post('/auth').send({
+        username: 'johndoe',
+        password: 'secret',
+      });
+
+      for (let i = 0; i < 5; i++) {
+        await request(app.getHttpServer())
+          .post('/threads')
+          .auth(response.body.data.accessToken, {
+            type: 'bearer',
+          })
+          .send({
+            content: `New Thread ${i + 1}`,
+          });
+      }
+
+      const { status, body } = await request(app.getHttpServer()).get(
+        '/threads',
+      );
+
+      expect(status).toBe(200);
+      expect(body.status).toBe('success');
+      expect(body.data.threads.length).toBe(5);
+    });
+  });
+
+  describe('GET: /threads/:threadId', () => {
+    it('it should can find thread by id', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const response = await request(app.getHttpServer()).post('/auth').send({
+        username: 'johndoe',
+        password: 'secret',
+      });
+
+      const responseThread = await request(app.getHttpServer())
+        .post('/threads')
+        .auth(response.body.data.accessToken, {
+          type: 'bearer',
+        })
+        .send({
+          content: 'New Thread',
+        });
+
+      const { status, body } = await request(app.getHttpServer()).get(
+        `/threads/${responseThread.body.data.threadId}`,
+      );
+
+      expect(status).toBe(200);
+      expect(body.status).toBe('success');
+      expect(body.data.thread.id).toBeDefined();
+
+      expect(body.data.thread.content).toBeDefined();
+      expect(body.data.thread.content).toBe('New Thread');
+
+      expect(body.data.thread.owner).toBeDefined();
+      expect(body.data.thread.owner).toBe('johndoe');
+
+      expect(body.data.thread.createdAt).toBeDefined();
+      expect(body.data.thread.updatedAt).toBeDefined();
+    });
+
+    it('it should cannot find thread if id thread is incorrect', async () => {
+      const { status, body } = await request(app.getHttpServer()).get(
+        '/threads/123-456',
+      );
+
+      expect(status).toBe(404);
+      expect(body.message).toBeDefined();
+    });
+  });
 });
