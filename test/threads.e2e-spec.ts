@@ -300,4 +300,152 @@ describe('Threads (e2e)', () => {
       expect(body.message).toBeDefined();
     });
   });
+
+  describe('DELETE: /threads/:threadId', () => {
+    it('it should can delete thread', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const responseAuth = await request(app.getHttpServer())
+        .post('/auth')
+        .send({
+          username: 'johndoe',
+          password: 'secret',
+        });
+
+      const responseThread = await request(app.getHttpServer())
+        .post('/threads')
+        .auth(responseAuth.body.data.accessToken, {
+          type: 'bearer',
+        })
+        .send({
+          content: 'New Thread',
+        });
+
+      const { status, body } = await request(app.getHttpServer())
+        .delete(`/threads/${responseThread.body.data.threadId}`)
+        .auth(responseAuth.body.data.accessToken, {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(200);
+      expect(body.status).toBe('success');
+      expect(body.message).toBeDefined();
+
+      const { status: status2, body: body2 } = await request(
+        app.getHttpServer(),
+      ).get(`/threads/${responseThread.body.data.threadId}`);
+
+      expect(status2).toBe(404);
+      expect(body2.message).toBeDefined();
+    });
+
+    it('it should cannot delete thread if user unauthenticated', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const responseAuth = await request(app.getHttpServer())
+        .post('/auth')
+        .send({
+          username: 'johndoe',
+          password: 'secret',
+        });
+
+      const responseThread = await request(app.getHttpServer())
+        .post('/threads')
+        .auth(responseAuth.body.data.accessToken, {
+          type: 'bearer',
+        })
+        .send({
+          content: 'New Thread',
+        });
+
+      const { status, body } = await request(app.getHttpServer()).delete(
+        `/threads/${responseThread.body.data.threadId}`,
+      );
+
+      expect(status).toBe(401);
+      expect(body.message).toBeDefined();
+      expect(body.message).toBe('Unauthorized');
+    });
+
+    it('it should cannot delete thread if user not authorized', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'janedoe',
+        password: 'secret',
+        fullname: 'Jane Doe',
+      });
+      const responseAuthJohn = await request(app.getHttpServer())
+        .post('/auth')
+        .send({
+          username: 'johndoe',
+          password: 'secret',
+        });
+      const responseAuthJane = await request(app.getHttpServer())
+        .post('/auth')
+        .send({
+          username: 'janedoe',
+          password: 'secret',
+        });
+
+      const responseThread = await request(app.getHttpServer())
+        .post('/threads')
+        .auth(responseAuthJohn.body.data.accessToken, {
+          type: 'bearer',
+        })
+        .send({
+          content: 'New Thread',
+        });
+
+      const { status, body } = await request(app.getHttpServer())
+        .delete(`/threads/${responseThread.body.data.threadId}`)
+        .auth(responseAuthJane.body.data.accessToken, {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(403);
+      expect(body.message).toBeDefined();
+    });
+
+    it('it should cannot delete thread if thread id is incorrect', async () => {
+      await request(app.getHttpServer()).post('/users').send({
+        username: 'johndoe',
+        password: 'secret',
+        fullname: 'John Doe',
+      });
+      const responseAuth = await request(app.getHttpServer())
+        .post('/auth')
+        .send({
+          username: 'johndoe',
+          password: 'secret',
+        });
+
+      await request(app.getHttpServer())
+        .post('/threads')
+        .auth(responseAuth.body.data.accessToken, {
+          type: 'bearer',
+        })
+        .send({
+          content: 'New Thread',
+        });
+
+      const { status, body } = await request(app.getHttpServer())
+        .put('/threads/123-456')
+        .auth(responseAuth.body.data.accessToken, {
+          type: 'bearer',
+        });
+
+      expect(status).toBe(404);
+      expect(body.message).toBeDefined();
+    });
+  });
 });
